@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Mapper</title>
+    <style>
+        #container {
+            position: relative;
+            width: 500px; /* Adjust this to match your image width */
+            height: 500px; /* Adjust this to match your image height */
+            margin: 0 auto;
+        }
+        #image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <img id="image" src="./Tracking meet up.jpg" alt="Your Image" usemap="#image-map">
+        <map name="image-map">
+            <!-- Define your polygonal area using the coordinates -->
+            <area shape="poly" coords="107,310,30,336,78,376,116,383,148,372,157,351,153,335,160,317,119,308,86,309" href="#" alt="Area 1">
+            <area shape="poly" coords="188,326,158,335,163,375,177,400,227,407,251,392,288,385,293,357,266,344,257,331,225,324,203,323,185,324,170,329" href="#" alt="Area 2">
+            <!-- Add more areas as needed -->
+        </map>
+    </div>
+    <button id="saveBtn">Save Coordinates</button>
+    <script>
+        var coordinates = []; // Array to store clicked coordinates
+
+        function handleClick(event) {
+            var container = this.getBoundingClientRect();
+            var offsetX, offsetY;
+
+            // Check if it's a touch event or a mouse event
+            if (event.touches && event.touches.length > 0) {
+                // Touch event
+                offsetX = event.touches[0].clientX - container.left;
+                offsetY = event.touches[0].clientY - container.top;
+            } else {
+                // Mouse event
+                offsetX = event.clientX - container.left;
+                offsetY = event.clientY - container.top;
+            }
+
+            coordinates.push([offsetX, offsetY]); // Add clicked coordinates to the array
+            console.log('Coordinates:', coordinates);
+            updateCoords();
+        }
+
+        document.getElementById('container').addEventListener('click', handleClick);
+        document.getElementById('container').addEventListener('touchstart', handleClick);
+
+        function updateCoords() {
+            var polyCoords = coordinates.join(); // Join the coordinates into a string
+            var areas = document.querySelectorAll('area');
+            areas.forEach(function(area) {
+                area.setAttribute('coords', polyCoords); // Set the coordinates attribute of each area element
+            });
+        }
+
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            // Convert coordinates array to JSON string
+            var jsonCoords = JSON.stringify(coordinates);
+            
+            // Create a Blob containing the JSON data
+            var blob = new Blob([jsonCoords], { type: "application/json" });
+
+            // Create a download link
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'coordinates.json';
+            a.click();
+        });
+    </script>
+</body>
+</html>
